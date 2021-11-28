@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'accounts',
     'branches',
     'kitchens',
-    'orders'
+    'orders',
+    'rest_framework.authtoken'
 
 ]
 
@@ -131,5 +132,6 @@ STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media_root')
+MEDIA_URL = '/media/'
 
 AUTH_USER_MODEL = 'accounts.User'
