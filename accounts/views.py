@@ -10,6 +10,8 @@ from kitchens.models import Kitchens
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
 from .serializers import LoginSerializer
+from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated 
 
 
 class LoginView(APIView):
@@ -23,14 +25,13 @@ class LoginView(APIView):
         if user:         
             token = Token.objects.get_or_create(user=user)[0]
             return Response({'token': token.key})
-
   
         return Response({"error": "Wrong email or password"}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class SignupView(APIView):
     def post(self, request):
-        
+       
         try:
             new_user =  User.objects.create_user(
                 username = request.data["username"],
@@ -38,7 +39,6 @@ class SignupView(APIView):
                 password = request.data["password"],
                 is_superuser = request.data["is_superuser"],
                 is_staff = request.data["is_staff"],
-                image = None,
                 legal_id = request.data["legal_id"],
             )
         except IntegrityError:
@@ -48,58 +48,87 @@ class SignupView(APIView):
         return Response(serialized.data, status=status.HTTP_201_CREATED)
 
 
-class ImagesView(APIView):
-    parser_classes=[MultiPartParser, FormParser]
+class UserView(APIView):
+
+    def get(self,request):
+
+        users = User.objects.all()
+
+        serialized = UserSerializer(users, many=True)
+
+        return Response(serialized.data,status=status.HTTP_200_OK)
 
 
-    def post(self, request, format=None):
+class UserDetailView(APIView):
 
-        serializer = UserSerializer(data=request.data)
-        
-        serializer.is_valid(raise_exception=True)
-        
-        serializer.save()
-        
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    def get(self,request, user_id=""):
 
-
-    def get(self, request):
-
-        all_data = [],
-
-        kitchen = Kitchens.objects.all()
-
-        all_data = [{
-            'kitchen_id': item.id,
-            'user_id': kitchen.user.id,
-            'image': kitchen.user.image
-            } for item in kitchen]
-
-        return Response(all_data, status=status.status.HTTP_200_OK)
-
-
-        
-class ImagesDetailView(APIView):
-    parser_classes=[MultiPartParser, FormParser]
-
-    def patch(self, request, user_id="", format=None):
-
-        user = get_object_or_404(User,id=user_id)
-
-        fields = ['username', 'password', 'email', 'is_staff', 'is_superuser', 'legal_id', 'image']
-
-        for item in fields:
-            if request.data[item]:
-
-                key = item
-                
-                exec("%s = %d" % (key, request.data[item]))
-
-                user.item = request.data[item]
-
-                user.save()
-
+        user = get_object_or_404(User, id=user_id)
         serialized = UserSerializer(user)
 
-        return Response(serialized.data, status=status.HTTP_200_OK)
+        return Response(serialized.data,status=status.HTTP_200_OK)
+
+
+    def delete(self,request, user_id=""):
+
+        user = get_object_or_404(User, id=user_id)
+        user.delete()
+
+        return Response({'message' : f"user {user_id} deleted"},status=status.HTTP_200_OK)
+
+
+    def patch(self,request, user_id=""):
+
+        user = get_object_or_404(User, id=user_id)
+
+        serialized = UserSerializer(user, request.data, partial=True)
+
+        fields = ["username", "email", "password", "is_superuser", "is_staff", "legal_id", 'password']
+        wrong_fields = []
+
+        for item in request.data:
+            wrong_fields = []
+
+            if item == 'password':
+                return Response({'message' : 'this end-point does not update PASSWORD'} , status=status.HTTP_400_BAD_REQUEST)
+
+            if item not in fields:
+                wrong_fields.append(item)
+
+        if len(wrong_fields) > 0:
+
+            return Response({'message' : {'wrong_fields' : wrong_fields}} , status=status.HTTP_400_BAD_REQUEST)
         
+        if serialized.is_valid():
+            serialized.save()
+            return Response(serialized.data, status=status.HTTP_200_OK)
+
+        return Response({'message' : 'wrong parrameters'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ResetPasswordView(APIView):
+
+    def patch(self,request, user_id=""):
+        
+        user = get_object_or_404(User, id=user_id)
+
+        user.set_password(request.data['password'])
+
+        user.save()
+
+        return Response({"message" : "Password Reseted"}, status=status.HTTP_200_OK)
+
+
+class ChangePasswordView(APIView):
+    def patch(self,request, user_id=""):
+
+        user = get_object_or_404(User, id=user_id)
+
+        if not user.check_password(request.data['old_password']):
+            return Response({"message" : "old Password is invalid"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        user.set_password(request.data['new_password'])
+
+        user.save()
+
+        return Response({"message" : "Password Updated"}, status=status.HTTP_200_OK)

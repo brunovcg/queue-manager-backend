@@ -5,7 +5,7 @@ from accounts.models import User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id','username', 'password', 'email', 'is_staff', 'is_superuser', 'legal_id', "image"]
+        fields = ['id','username', 'email', 'is_staff', 'is_superuser', 'legal_id']
 
 
     def create(self, validated_data):
@@ -15,3 +15,5 @@ class UserSerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField()
+
+
