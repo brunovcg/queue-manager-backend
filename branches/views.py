@@ -5,8 +5,13 @@ from .models import Branches
 from .serializers import BranchesSerializer
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
+from rest_framework.authentication import TokenAuthentication
+from accounts.permissions import IsSuperuser
 
 class BranchesView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsSuperuser]
+    
 
     def post(self, request):
 
@@ -29,19 +34,19 @@ class BranchesView(APIView):
     def get(self, request):
 
         branches = Branches.objects.all()
-
         serialized = BranchesSerializer(branches, many=True)
 
         return Response(serialized.data, status=status.HTTP_200_OK)
 
 
 class BranchesDetailView(APIView):
-
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsSuperuser]
+    
 
     def patch(self,request, branch_id=""):
 
         branch = get_object_or_404(Branches, id=branch_id)
-
         serialized = BranchesSerializer(branch, request.data, partial=True)
 
         if serialized.is_valid():
@@ -54,7 +59,6 @@ class BranchesDetailView(APIView):
         branch = get_object_or_404(Branches, id=branch_id)
         serialized = BranchesSerializer(branch)
 
-
         return Response(serialized.data, status=status.HTTP_200_OK)
 
 
@@ -63,4 +67,4 @@ class BranchesDetailView(APIView):
         branch = get_object_or_404(Branches, id=branch_id)
         branch.delete()
 
-        return Response({'message' : f"branch {branch_id} deleted"},status=status.HTTP_200_OK)
+        return Response({'message' : f"Branch {branch_id} deleted"},status=status.HTTP_200_OK)

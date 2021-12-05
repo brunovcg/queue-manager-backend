@@ -6,3 +6,4 @@ class Orders (models.Model):
     creation_date = models.DateField(auto_now_add=True)
 
     kitchen = models.ForeignKey('kitchens.Kitchens', on_delete=models.CASCADE, related_name="orders")
+    
