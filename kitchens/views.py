@@ -7,7 +7,8 @@ from django.db import IntegrityError
 from kitchens.models import Kitchens
 from django.shortcuts import get_object_or_404
 from .serializers import KitchenSerializer, KitchenUpdateSerializer
-
+from orders.serializers import OrdersSerializer
+from orders.models import Orders
 
 class KitchensView(APIView):
 
@@ -31,7 +32,6 @@ class KitchensDetailView(APIView):
         kitchen = get_object_or_404(Kitchens, id=kitchen_id)
         serialized = KitchenUpdateSerializer(kitchen, request.data, partial=True)
   
-
         try:
             user =  int(request.data['user'])
             try:
@@ -76,14 +76,32 @@ class KitchensDetailOrdersView(APIView):
 
     def get(self,request, kitchen_id=""):
 
+        #  faltandado fazer o GET, eu acho que tem que trazer o Kitchen.orders!!
 
-        return Response("teste",status=status.HTTP_200_OK)
+
+        kitchen = get_object_or_404(Kitchens, id=kitchen_id )
+
+        orders = get_object_or_404(Orders, kitchen_id= kitchen)
+
+        serialized = OrdersSerializer(orders, many=True)
+
+
+        return Response(serialized.data,status=status.HTTP_200_OK)
 
 
     def post(self,request, kitchen_id=""):
 
+        kicthen = get_object_or_404(Kitchens, id=kitchen_id )
 
-        return Response("teste",status=status.HTTP_200_OK)
+        order = Orders.objects.get_or_create(number=request.data['number'], kitchen=kicthen)
+
+        if not order[1]:
+            return Response({"message" : "This order already exists"},status=status.HTTP_409_CONFLICT)
+
+        serialized = OrdersSerializer(order[0])
+
+
+        return Response(serialized.data,status=status.HTTP_200_OK)
 
 
 class KitchensDetailOrdersDetailView(APIView):
@@ -91,7 +109,8 @@ class KitchensDetailOrdersDetailView(APIView):
 
     def delete(self,request, kitchen_id="", order_id=""):
 
-        
+
+       
 
 
         return Response("teste",status=status.HTTP_204_NO_CONTENT)

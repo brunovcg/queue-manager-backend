@@ -9,7 +9,7 @@ class Kitchens (models.Model):
 
     code = models.CharField(max_length=255, unique=True)
     image = models.ImageField(upload_to=upload_to, default="default.jpg")
-
+    label = models.CharField(max_length=255)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="kitchens")
     branch = models.ForeignKey('branches.Branches', on_delete=models.CASCADE, related_name="kitchens")
 
