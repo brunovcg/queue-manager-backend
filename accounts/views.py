@@ -7,23 +7,36 @@ from rest_framework import status
 from django.db import IntegrityError
 from .serializers import UserSerializer
 from django.shortcuts import get_object_or_404
-from rest_framework.permissions import IsAuthenticated 
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from accounts.permissions import IsSuperuser
+from accounts.models import User
 
 class LoginView(APIView):
 
     def post(self, request):
-    
+
         username= request.data['username']
         password = request.data['password']
 
         user = authenticate(username=username, password=password)
-    
-        if user:         
+
+        user_type = ""
+
+        if user:
             token = Token.objects.get_or_create(user=user)[0]
-            return Response({'token': token.key})
-  
+
+            user_logged = User.objects.get(username=username)
+
+            if user_logged.is_superuser and user_logged.is_staff:
+                user_type = 'superuser'
+            elif user_logged.is_staff:
+                user_type = 'staff'
+            else:
+                user_type="user"
+
+            return Response({'token': token.key, "user_id" : user_logged.id, "user_type" : user_type })
+
         return Response({"message": "Wrong e-mail or password"}, status=status.HTTP_401_UNAUTHORIZED)
 
 
@@ -33,7 +46,7 @@ class SignupView(APIView):
 
 
     def post(self, request):
-       
+
         try:
             new_user =  User.objects.create_user(
                 username = request.data["username"],
@@ -102,7 +115,7 @@ class UserDetailView(APIView):
         if len(wrong_fields) > 0:
 
             return Response({'message' : {'wrong_fields' : wrong_fields}} , status=status.HTTP_400_BAD_REQUEST)
-        
+
         if serialized.is_valid():
             serialized.save()
             return Response(serialized.data, status=status.HTTP_200_OK)
@@ -114,14 +127,13 @@ class ResetPasswordView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsSuperuser]
 
-    def patch(self,request, user_id=""):
-        
-        user = get_object_or_404(User, id=user_id)
+    def patch(self,request):
+
+        user = get_object_or_404(User, id=int(request.data['id']))
         user.set_password(request.data['password'])
         user.save()
 
         return Response({"message" : "Password Reseted"}, status=status.HTTP_200_OK)
-
 
 class ChangePasswordView(APIView):
     authentication_classes = [TokenAuthentication]
