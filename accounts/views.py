@@ -35,7 +35,7 @@ class LoginView(APIView):
             else:
                 user_type="user"
 
-            return Response({'token': token.key, "user_id" : user_logged.id, "user_type" : user_type })
+            return Response({'token': token.key, "user_id" : user_logged.id, "user_type" : user_type, "username" : user_logged.username })
 
         return Response({"message": "Wrong e-mail or password"}, status=status.HTTP_401_UNAUTHORIZED)
 
