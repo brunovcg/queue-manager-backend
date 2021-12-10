@@ -20,9 +20,22 @@ class KitchensView(APIView):
 
     def post(self,request):
 
-        serializer = KitchenSerializer(data = request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+        data = request.data
+
+        branch_id = data['branch']
+        user_id = int(data['user'])       
+        user = get_object_or_404(User, id=user_id)
+        branch = get_object_or_404(Branches, id=branch_id)
+
+        if user.is_staff:
+            return Response({"message" : "You can`t add a staff/superuser as a kitchen client"}, status=status.HTTP_400_BAD_REQUEST)
+
+        kitchen = Kitchens.objects.get_or_create(image= data['image'], code= data['code'],label =data['label'], user = user, branch = branch)
+
+        if not kitchen[1]:
+            return Response({"message" : "This kitchen already exists"},status=status.HTTP_409_CONFLICT)
+
+        serializer = KitchenSerializer(kitchen[0])
         return Response(serializer.data,status=status.HTTP_201_CREATED)
 
 
