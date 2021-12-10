@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'branches',
     'kitchens',
     'orders',
+    'informations',
     'rest_framework.authtoken',
     'corsheaders'
 

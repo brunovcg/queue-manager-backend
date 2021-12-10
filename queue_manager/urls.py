@@ -11,6 +11,7 @@ urlpatterns = [
     path('api/', include('kitchens.urls')),
     path('api/', include('accounts.urls')),
     path('api/', include('branches.urls')),
+    path('api/', include('informations.urls')),
 ]
 
 
