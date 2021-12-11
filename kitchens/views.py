@@ -17,7 +17,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 class KitchensView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsSuperuserStaffCanGet]
-    parser_classes = [ MultiPartParser, FormParser]
+    # parser_classes = [ MultiPartParser, FormParser]
 
 
     def post(self,request):
