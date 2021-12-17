@@ -31,19 +31,12 @@ class KitchensView(APIView):
             return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self,request):
-            
-        user_id = request.GET.get('userId', None)
-
-        if user_id != None:
-            user = User.objects.get(id=int(user_id))  
-            kitchens= Kitchens.objects.filter(user = user)
-       
-        else:
-            kitchens = Kitchens.objects.all()
-      
+        
+        kitchens = Kitchens.objects.all()
 
         serialized = KitchenSerializer(kitchens, many=True)
         return Response(serialized.data, status=status.HTTP_200_OK)
+
 
 
 class KitchensDetailView(APIView):

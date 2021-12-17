@@ -11,6 +11,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from accounts.permissions import IsSuperuser
 from accounts.models import User
+from kitchens.models import Kitchens
+from kitchens.serializers import KitchenSerializer
 
 class LoginView(APIView):
 
@@ -154,3 +156,26 @@ class ChangePasswordView(APIView):
         user.save()
 
         return Response({"message" : "Password Updated"}, status=status.HTTP_200_OK)
+
+
+class UserKitchensView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self,request, user_id=""):
+
+        user_logged = request.user
+
+        if not user_logged.is_staff and user_logged.id != user_id :
+            return Response({"message" : "User only can get it`s on informations"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        user = get_object_or_404(User, id=user_id)
+
+ 
+        kitchens= Kitchens.objects.filter(user = user)
+        serialized = KitchenSerializer(kitchens, many=True)
+
+        return Response({serialized.data}, status=status.HTTP_200_OK)
+       
+      
+
