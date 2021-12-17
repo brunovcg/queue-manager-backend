@@ -124,7 +124,7 @@ class KitchensDetailOrdersView(APIView):
         kitchen = get_object_or_404(Kitchens, id=kitchen_id )
         user_logged = request.user
 
-        if not user_logged.is_superuser and kitchen.user.id != user_logged:
+        if not user_logged.is_superuser and kitchen.user.id != user_logged.id:
             return Response({"message": "User can only POST it's own kitchen's orders"}, status=status.HTTP_401_UNAUTHORIZED)
 
         order = Orders.objects.get_or_create(number=request.data['number'], kitchen=kitchen)
