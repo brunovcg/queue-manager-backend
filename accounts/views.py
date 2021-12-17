@@ -166,16 +166,17 @@ class UserKitchensView(APIView):
 
         user_logged = request.user
 
+
         if not user_logged.is_staff and user_logged.id != user_id :
             return Response({"message" : "User only can get it`s on informations"}, status=status.HTTP_401_UNAUTHORIZED)
 
-        user = get_object_or_404(User, id=user_id)
+        user = get_object_or_404(User, id=int(user_id))
 
  
         kitchens= Kitchens.objects.filter(user = user)
         serialized = KitchenSerializer(kitchens, many=True)
 
-        return Response({serialized.data}, status=status.HTTP_200_OK)
+        return Response(serialized.data, status=status.HTTP_200_OK)
        
       
 
