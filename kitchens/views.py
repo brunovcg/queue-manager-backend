@@ -78,7 +78,7 @@ class KitchensDetailView(APIView):
         kitchen = get_object_or_404(Kitchens, id=kitchen_id)
         user_logged = request.user
 
-        if not user_logged.is_superuser and kitchen.user.id != user_logged:
+        if not user_logged.is_superuser and kitchen.user.id != user_logged.id:
             return Response({"message": "User can only GET it's own kitchen's orders"}, status=status.HTTP_401_UNAUTHORIZED)
 
         serialized = KitchenSerializer(kitchen)
