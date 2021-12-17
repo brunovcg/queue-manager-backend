@@ -142,7 +142,7 @@ class KitchensDetailOrdersView(APIView):
         kitchen = get_object_or_404(Kitchens, id=kitchen_id )
         user_logged = request.user
 
-        if not user_logged.is_superuser and kitchen.user.id != user_logged:
+        if not user_logged.is_superuser and kitchen.user.id != user_logged.id:
             return Response({"message": "User can only POST it owns kitchen`s orders"}, status=status.HTTP_401_UNAUTHORIZED)      
 
         orders = Orders.objects.filter(kitchen = kitchen_id)
@@ -164,7 +164,7 @@ class KitchensDetailOrdersDetailView(APIView):
         user_logged = request.user
         kitchen = get_object_or_404(Kitchens, id=kitchen_id)
         
-        if not user_logged.is_superuser and kitchen.user.id != user_logged:
+        if not user_logged.is_superuser and kitchen.user.id != user_logged.id:
             return Response({"message": "User can only delete it owns kitchen orders"}, status=status.HTTP_401_UNAUTHORIZED)
 
         order = get_object_or_404(Orders, id= order_id)
