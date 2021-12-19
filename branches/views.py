@@ -6,11 +6,11 @@ from .serializers import BranchesSerializer
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from rest_framework.authentication import TokenAuthentication
-from accounts.permissions import IsSuperuser
+from accounts.permissions import IsSuperuser, IsSuperuserStaffCanGet
 
 class BranchesView(APIView):
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsSuperuser]
+    permission_classes = [IsSuperuserStaffCanGet]
     
 
     def post(self, request):
