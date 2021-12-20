@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-k&=67g@s&jsqc1!#h_)nczr8ndie9ae^g^mx#g(^cdw!8=m^1+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['gokitchen.herokuapp.com','localhost']
 
 
 # Application definition
